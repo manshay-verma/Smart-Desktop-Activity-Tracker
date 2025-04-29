@@ -1,13 +1,17 @@
+#!/usr/bin/env python3
 """
 Database Manager Module
 Handles database operations for the Smart Desktop Activity Tracker
 """
 
 import os
-import logging
+import json
+import time
 from datetime import datetime, timedelta
-from sqlalchemy.exc import SQLAlchemyError
-from models import User, Screenshot, ActivityLog, AutomationTask, AutomationSuggestion, get_session, init_db
+import sqlalchemy.exc
+from sqlalchemy.orm import sessionmaker
+
+from models import init_db, User, Screenshot, ActivityLog, AutomationTask, AutomationSuggestion
 from utils import setup_logging
 
 # Setup logging
@@ -19,60 +23,56 @@ class DBManager:
     """
     def __init__(self):
         """Initialize the database manager"""
-        self.session = None
         try:
-            # Initialize database tables
-            init_db()
+            # Initialize database
+            self.engine = init_db()
+            self.Session = sessionmaker(bind=self.engine)
             
-            # Get a session
-            self.session = get_session()
-            
-            # Check if we have a default user, create if not
+            # Create a default user if one doesn't exist
             self._ensure_default_user()
             
             logger.info("Database manager initialized")
-        except SQLAlchemyError as e:
+        except Exception as e:
             logger.error(f"Database initialization error: {e}")
+            raise
     
     def _ensure_default_user(self):
         """Ensure that a default user exists in the database"""
-        if not self.session:
-            logger.error("No database session available")
-            return
-        
+        session = self.Session()
         try:
             # Check if default user exists
-            user = self.session.query(User).filter_by(username="default").first()
-            if not user:
-                # Create default user
-                user = User(
-                    username="default",
-                    email="default@example.com",
-                    settings={"keyboard_privacy_mode": True, "screenshot_interval": 1}
-                )
-                self.session.add(user)
-                self.session.commit()
-                logger.info("Created default user")
+            default_user = session.query(User).filter_by(username='default').first()
             
-            # Return the user ID
-            return user.id
-        except SQLAlchemyError as e:
+            if not default_user:
+                # Create default user
+                default_user = User(
+                    username='default',
+                    email='default@example.com',
+                    settings={
+                        'keyboard_privacy_mode': True,
+                        'screenshot_interval': 1
+                    }
+                )
+                session.add(default_user)
+                session.commit()
+                logger.info("Created default user")
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error ensuring default user: {e}")
-            self.session.rollback()
-            return None
+        finally:
+            session.close()
     
     def get_default_user_id(self):
         """Get the ID of the default user"""
-        if not self.session:
-            logger.error("No database session available")
-            return None
-        
+        session = self.Session()
         try:
-            user = self.session.query(User).filter_by(username="default").first()
-            return user.id if user else None
-        except SQLAlchemyError as e:
-            logger.error(f"Error getting default user: {e}")
+            default_user = session.query(User).filter_by(username='default').first()
+            return default_user.id if default_user else None
+        except Exception as e:
+            logger.error(f"Error getting default user ID: {e}")
             return None
+        finally:
+            session.close()
     
     def save_screenshot(self, file_path, window_title=None, application_name=None, extracted_text=None, thumbnail_path=None, resolution=None):
         """
@@ -89,14 +89,11 @@ class DBManager:
         Returns:
             int: ID of the created screenshot record, or None on failure
         """
-        if not self.session:
-            logger.error("No database session available")
-            return None
-        
+        session = self.Session()
         try:
             user_id = self.get_default_user_id()
             if not user_id:
-                logger.error("No default user found")
+                logger.error("No default user found for saving screenshot")
                 return None
             
             screenshot = Screenshot(
@@ -109,16 +106,16 @@ class DBManager:
                 resolution=resolution
             )
             
-            self.session.add(screenshot)
-            self.session.commit()
+            session.add(screenshot)
+            session.commit()
             
-            logger.debug(f"Saved screenshot: {screenshot.id}")
             return screenshot.id
-        
-        except SQLAlchemyError as e:
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error saving screenshot: {e}")
-            self.session.rollback()
             return None
+        finally:
+            session.close()
     
     def update_screenshot(self, screenshot_id, **kwargs):
         """
@@ -131,12 +128,9 @@ class DBManager:
         Returns:
             bool: Success status
         """
-        if not self.session:
-            logger.error("No database session available")
-            return False
-        
+        session = self.Session()
         try:
-            screenshot = self.session.query(Screenshot).filter_by(id=screenshot_id).first()
+            screenshot = session.query(Screenshot).get(screenshot_id)
             if not screenshot:
                 logger.error(f"Screenshot with ID {screenshot_id} not found")
                 return False
@@ -146,14 +140,14 @@ class DBManager:
                 if hasattr(screenshot, key):
                     setattr(screenshot, key, value)
             
-            self.session.commit()
-            logger.debug(f"Updated screenshot: {screenshot_id}")
+            session.commit()
             return True
-        
-        except SQLAlchemyError as e:
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error updating screenshot: {e}")
-            self.session.rollback()
             return False
+        finally:
+            session.close()
     
     def log_activity(self, activity_type, description=None, screenshot_id=None, data=None):
         """
@@ -168,14 +162,11 @@ class DBManager:
         Returns:
             int: ID of the created activity log, or None on failure
         """
-        if not self.session:
-            logger.error("No database session available")
-            return None
-        
+        session = self.Session()
         try:
             user_id = self.get_default_user_id()
             if not user_id:
-                logger.error("No default user found")
+                logger.error("No default user found for logging activity")
                 return None
             
             activity_log = ActivityLog(
@@ -186,16 +177,16 @@ class DBManager:
                 data=data
             )
             
-            self.session.add(activity_log)
-            self.session.commit()
+            session.add(activity_log)
+            session.commit()
             
-            logger.debug(f"Logged activity: {activity_log.id}")
             return activity_log.id
-        
-        except SQLAlchemyError as e:
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error logging activity: {e}")
-            self.session.rollback()
             return None
+        finally:
+            session.close()
     
     def save_automation_task(self, name, steps, description=None, triggers=None):
         """
@@ -210,14 +201,11 @@ class DBManager:
         Returns:
             int: ID of the created automation task, or None on failure
         """
-        if not self.session:
-            logger.error("No database session available")
-            return None
-        
+        session = self.Session()
         try:
             user_id = self.get_default_user_id()
             if not user_id:
-                logger.error("No default user found")
+                logger.error("No default user found for saving automation task")
                 return None
             
             automation_task = AutomationTask(
@@ -225,19 +213,20 @@ class DBManager:
                 name=name,
                 description=description,
                 steps=steps,
-                triggers=triggers
+                triggers=triggers,
+                is_active=True
             )
             
-            self.session.add(automation_task)
-            self.session.commit()
+            session.add(automation_task)
+            session.commit()
             
-            logger.debug(f"Saved automation task: {automation_task.id}")
             return automation_task.id
-        
-        except SQLAlchemyError as e:
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error saving automation task: {e}")
-            self.session.rollback()
             return None
+        finally:
+            session.close()
     
     def update_automation_execution(self, task_id):
         """
@@ -249,27 +238,24 @@ class DBManager:
         Returns:
             bool: Success status
         """
-        if not self.session:
-            logger.error("No database session available")
-            return False
-        
+        session = self.Session()
         try:
-            task = self.session.query(AutomationTask).filter_by(id=task_id).first()
+            task = session.query(AutomationTask).get(task_id)
             if not task:
                 logger.error(f"Automation task with ID {task_id} not found")
                 return False
             
-            task.execution_count += 1
             task.last_executed = datetime.now()
+            task.execution_count += 1
             
-            self.session.commit()
-            logger.debug(f"Updated automation execution: {task_id}")
+            session.commit()
             return True
-        
-        except SQLAlchemyError as e:
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error updating automation execution: {e}")
-            self.session.rollback()
             return False
+        finally:
+            session.close()
     
     def save_automation_suggestion(self, title, description=None, confidence=0.0, pattern_data=None):
         """
@@ -284,14 +270,11 @@ class DBManager:
         Returns:
             int: ID of the created suggestion, or None on failure
         """
-        if not self.session:
-            logger.error("No database session available")
-            return None
-        
+        session = self.Session()
         try:
             user_id = self.get_default_user_id()
             if not user_id:
-                logger.error("No default user found")
+                logger.error("No default user found for saving automation suggestion")
                 return None
             
             suggestion = AutomationSuggestion(
@@ -302,16 +285,16 @@ class DBManager:
                 pattern_data=pattern_data
             )
             
-            self.session.add(suggestion)
-            self.session.commit()
+            session.add(suggestion)
+            session.commit()
             
-            logger.debug(f"Saved automation suggestion: {suggestion.id}")
             return suggestion.id
-        
-        except SQLAlchemyError as e:
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error saving automation suggestion: {e}")
-            self.session.rollback()
             return None
+        finally:
+            session.close()
     
     def get_recent_activities(self, limit=50):
         """
@@ -323,27 +306,29 @@ class DBManager:
         Returns:
             list: List of activity logs, or empty list on failure
         """
-        if not self.session:
-            logger.error("No database session available")
-            return []
-        
+        session = self.Session()
         try:
-            user_id = self.get_default_user_id()
-            if not user_id:
-                logger.error("No default user found")
-                return []
+            activities = session.query(ActivityLog).order_by(ActivityLog.timestamp.desc()).limit(limit).all()
             
-            activities = self.session.query(ActivityLog)\
-                .filter_by(user_id=user_id)\
-                .order_by(ActivityLog.timestamp.desc())\
-                .limit(limit)\
-                .all()
+            # Convert to dictionaries
+            result = []
+            for activity in activities:
+                activity_dict = {
+                    'id': activity.id,
+                    'timestamp': activity.timestamp,
+                    'activity_type': activity.activity_type,
+                    'description': activity.description,
+                    'screenshot_id': activity.screenshot_id,
+                    'data': activity.data
+                }
+                result.append(activity_dict)
             
-            return activities
-        
-        except SQLAlchemyError as e:
+            return result
+        except Exception as e:
             logger.error(f"Error getting recent activities: {e}")
             return []
+        finally:
+            session.close()
     
     def get_automation_tasks(self):
         """
@@ -352,26 +337,31 @@ class DBManager:
         Returns:
             list: List of automation tasks, or empty list on failure
         """
-        if not self.session:
-            logger.error("No database session available")
-            return []
-        
+        session = self.Session()
         try:
-            user_id = self.get_default_user_id()
-            if not user_id:
-                logger.error("No default user found")
-                return []
+            tasks = session.query(AutomationTask).filter_by(is_active=True).all()
             
-            tasks = self.session.query(AutomationTask)\
-                .filter_by(user_id=user_id)\
-                .order_by(AutomationTask.created_at.desc())\
-                .all()
+            # Convert to dictionaries
+            result = []
+            for task in tasks:
+                task_dict = {
+                    'id': task.id,
+                    'name': task.name,
+                    'description': task.description,
+                    'created_at': task.created_at,
+                    'last_executed': task.last_executed,
+                    'execution_count': task.execution_count,
+                    'steps': task.steps,
+                    'triggers': task.triggers
+                }
+                result.append(task_dict)
             
-            return tasks
-        
-        except SQLAlchemyError as e:
+            return result
+        except Exception as e:
             logger.error(f"Error getting automation tasks: {e}")
             return []
+        finally:
+            session.close()
     
     def get_automation_suggestions(self, include_dismissed=False):
         """
@@ -383,30 +373,35 @@ class DBManager:
         Returns:
             list: List of automation suggestions, or empty list on failure
         """
-        if not self.session:
-            logger.error("No database session available")
-            return []
-        
+        session = self.Session()
         try:
-            user_id = self.get_default_user_id()
-            if not user_id:
-                logger.error("No default user found")
-                return []
-            
-            query = self.session.query(AutomationSuggestion)\
-                .filter_by(user_id=user_id)
-            
+            query = session.query(AutomationSuggestion)
             if not include_dismissed:
                 query = query.filter_by(is_dismissed=False)
             
-            suggestions = query.order_by(AutomationSuggestion.created_at.desc())\
-                .all()
+            suggestions = query.order_by(AutomationSuggestion.confidence.desc()).all()
             
-            return suggestions
-        
-        except SQLAlchemyError as e:
+            # Convert to dictionaries
+            result = []
+            for suggestion in suggestions:
+                suggestion_dict = {
+                    'id': suggestion.id,
+                    'title': suggestion.title,
+                    'description': suggestion.description,
+                    'created_at': suggestion.created_at,
+                    'confidence': suggestion.confidence,
+                    'is_dismissed': suggestion.is_dismissed,
+                    'is_implemented': suggestion.is_implemented,
+                    'pattern_data': suggestion.pattern_data
+                }
+                result.append(suggestion_dict)
+            
+            return result
+        except Exception as e:
             logger.error(f"Error getting automation suggestions: {e}")
             return []
+        finally:
+            session.close()
     
     def dismiss_suggestion(self, suggestion_id):
         """
@@ -418,26 +413,23 @@ class DBManager:
         Returns:
             bool: Success status
         """
-        if not self.session:
-            logger.error("No database session available")
-            return False
-        
+        session = self.Session()
         try:
-            suggestion = self.session.query(AutomationSuggestion).filter_by(id=suggestion_id).first()
+            suggestion = session.query(AutomationSuggestion).get(suggestion_id)
             if not suggestion:
-                logger.error(f"Suggestion with ID {suggestion_id} not found")
+                logger.error(f"Automation suggestion with ID {suggestion_id} not found")
                 return False
             
             suggestion.is_dismissed = True
             
-            self.session.commit()
-            logger.debug(f"Dismissed suggestion: {suggestion_id}")
+            session.commit()
             return True
-        
-        except SQLAlchemyError as e:
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error dismissing suggestion: {e}")
-            self.session.rollback()
             return False
+        finally:
+            session.close()
     
     def implement_suggestion(self, suggestion_id):
         """
@@ -449,26 +441,23 @@ class DBManager:
         Returns:
             bool: Success status
         """
-        if not self.session:
-            logger.error("No database session available")
-            return False
-        
+        session = self.Session()
         try:
-            suggestion = self.session.query(AutomationSuggestion).filter_by(id=suggestion_id).first()
+            suggestion = session.query(AutomationSuggestion).get(suggestion_id)
             if not suggestion:
-                logger.error(f"Suggestion with ID {suggestion_id} not found")
+                logger.error(f"Automation suggestion with ID {suggestion_id} not found")
                 return False
             
             suggestion.is_implemented = True
             
-            self.session.commit()
-            logger.debug(f"Implemented suggestion: {suggestion_id}")
+            session.commit()
             return True
-        
-        except SQLAlchemyError as e:
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error implementing suggestion: {e}")
-            self.session.rollback()
             return False
+        finally:
+            session.close()
     
     def cleanup_old_data(self, days=7):
         """
@@ -480,47 +469,61 @@ class DBManager:
         Returns:
             int: Number of deleted records
         """
-        if not self.session:
-            logger.error("No database session available")
-            return 0
-        
+        session = self.Session()
         try:
             cutoff_date = datetime.now() - timedelta(days=days)
             
-            # Get screenshot IDs to delete
-            screenshot_ids = [row[0] for row in self.session.query(Screenshot.id)
-                            .filter(Screenshot.timestamp < cutoff_date)
-                            .all()]
+            # Get screenshots to delete
+            old_screenshots = session.query(Screenshot).filter(Screenshot.timestamp < cutoff_date).all()
             
-            # Delete related activity logs first
-            deleted_logs = self.session.query(ActivityLog)\
-                .filter(ActivityLog.screenshot_id.in_(screenshot_ids))\
-                .delete(synchronize_session=False)
+            # Collect screenshot IDs for activity log cleanup
+            screenshot_ids = [s.id for s in old_screenshots]
             
-            # Delete screenshots
-            deleted_screenshots = self.session.query(Screenshot)\
-                .filter(Screenshot.timestamp < cutoff_date)\
-                .delete(synchronize_session=False)
+            # Delete activity logs associated with the screenshots
+            activities_deleted = 0
+            if screenshot_ids:
+                activities_deleted = session.query(ActivityLog).filter(ActivityLog.screenshot_id.in_(screenshot_ids)).delete(synchronize_session=False)
             
-            # Delete old activity logs without screenshots
-            deleted_logs += self.session.query(ActivityLog)\
-                .filter(ActivityLog.timestamp < cutoff_date)\
-                .delete(synchronize_session=False)
+            # Delete old activity logs regardless of screenshot association
+            activities_deleted += session.query(ActivityLog).filter(ActivityLog.timestamp < cutoff_date).delete(synchronize_session=False)
             
-            self.session.commit()
-            logger.info(f"Cleaned up {deleted_screenshots} screenshots and {deleted_logs} activity logs")
-            return deleted_screenshots + deleted_logs
-        
-        except SQLAlchemyError as e:
+            # Delete old screenshots
+            screenshots_deleted = 0
+            for screenshot in old_screenshots:
+                # Try to delete the actual file
+                try:
+                    if os.path.exists(screenshot.file_path):
+                        os.remove(screenshot.file_path)
+                    
+                    if screenshot.thumbnail_path and os.path.exists(screenshot.thumbnail_path):
+                        os.remove(screenshot.thumbnail_path)
+                except Exception as e:
+                    logger.warning(f"Error deleting screenshot file: {e}")
+                
+                # Mark for deletion from database
+                session.delete(screenshot)
+                screenshots_deleted += 1
+            
+            session.commit()
+            
+            total_deleted = activities_deleted + screenshots_deleted
+            logger.info(f"Cleaned up {activities_deleted} activity logs and {screenshots_deleted} screenshots")
+            
+            return total_deleted
+        except Exception as e:
+            session.rollback()
             logger.error(f"Error cleaning up old data: {e}")
-            self.session.rollback()
             return 0
+        finally:
+            session.close()
     
     def close(self):
         """Close the database session"""
-        if self.session:
-            self.session.close()
-            logger.info("Database session closed")
+        try:
+            self.engine.dispose()
+            logger.info("Database connection closed")
+        except Exception as e:
+            logger.error(f"Error closing database connection: {e}")
 
-# Create a singleton instance
+# Singleton instance
 db_manager = DBManager()
