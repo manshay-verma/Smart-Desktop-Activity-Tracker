@@ -89,7 +89,7 @@ class AutomationTask(Base):
     execution_count = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     steps = Column(JSON, nullable=False)
-    triggers = Column(JSONB)
+    triggers = Column(JSON)
     
     # Relationships
     user = relationship("User", back_populates="automation_tasks")
@@ -109,7 +109,7 @@ class AutomationSuggestion(Base):
     confidence = Column(Float, default=0.0)
     is_dismissed = Column(Boolean, default=False)
     is_implemented = Column(Boolean, default=False)
-    pattern_data = Column(JSONB)
+    pattern_data = Column(JSON)
     
     # Relationships
     user = relationship("User", back_populates="automation_suggestions")
