@@ -11,7 +11,6 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, B
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.schema import MetaData
-from sqlalchemy.dialects.postgresql import JSONB
 
 # Create a base class for declarative class definitions
 Base = declarative_base()
@@ -26,7 +25,7 @@ class User(Base):
     email = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.now)
     last_active = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    settings = Column(JSONB, default={})
+    settings = Column(JSON, default={})
     
     # Relationships
     screenshots = relationship("Screenshot", back_populates="user", cascade="all, delete-orphan")
@@ -68,7 +67,7 @@ class ActivityLog(Base):
     activity_type = Column(String(50), nullable=False)
     description = Column(Text)
     screenshot_id = Column(Integer, ForeignKey('screenshots.id'))
-    data = Column(JSONB)
+    data = Column(JSON)
     
     # Relationships
     user = relationship("User", back_populates="activity_logs")
@@ -89,7 +88,7 @@ class AutomationTask(Base):
     last_executed = Column(DateTime)
     execution_count = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
-    steps = Column(JSONB, nullable=False)
+    steps = Column(JSON, nullable=False)
     triggers = Column(JSONB)
     
     # Relationships
