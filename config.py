@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Configuration Module
 Defines global configuration settings for the Smart Desktop Activity Tracker
@@ -5,44 +6,65 @@ Defines global configuration settings for the Smart Desktop Activity Tracker
 
 import os
 import json
-import logging
+from utils import load_json_file, save_json_file, create_data_dirs, setup_logging
+
+# Setup logging
+logger = setup_logging()
 
 # Default configuration
-DEFAULT_CONFIG = {
-    # Screenshot settings
-    "screenshot_interval": 1,  # seconds
-    "click_screenshot": True,  # Take screenshot on click
-    "screenshot_max_count": 3000,  # Maximum number of screenshots to keep
-    
-    # Keyboard logger settings
-    "keyboard_buffer_size": 100,  # Number of keystrokes to buffer
-    "keyboard_privacy_mode": True,  # Mask sensitive input
-    "keyboard_save_interval": 60,  # seconds
-    
-    # Text analyzer settings
-    "text_analysis_interval": 2,  # seconds
-    "window_detection_enabled": True,  # Enable window detection in screenshots
-    
-    # GUI settings
-    "sidebar_width": 350,  # pixels
-    "sidebar_height": 600,  # pixels
-    "sidebar_opacity": 0.85,  # 0-1
-    "sidebar_auto_hide": False,  # Auto hide sidebar when inactive
-    "sidebar_position": "right",  # 'left' or 'right'
+CONFIG = {
+    # General settings
+    "app_name": "Smart Desktop Activity Tracker",
+    "version": "1.0.0",
     
     # Data storage settings
+    "data_dir": os.path.join(os.path.expanduser("~"), ".smart_desktop_tracker"),
+    "screenshots_dir": "screenshots",
+    "logs_dir": "logs",
     "keep_history_days": 7,  # Number of days to keep data
     
-    # Tesseract OCR path (Windows-specific)
-    "pytesseract_path": r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+    # Screenshot settings
+    "screenshot_on_window_change": True,
+    "screenshot_on_idle_return": True,
+    "screenshot_interval": 60,  # Seconds between periodic screenshots
+    "screenshot_quality": 80,  # JPEG quality (0-100)
+    "create_thumbnails": True,
+    "thumbnail_size": (320, 180),  # Width, height
+    "max_screenshots": 3000,  # Maximum number of screenshots to store
+    
+    # Privacy settings
+    "keyboard_privacy_mode": True,  # Don't log keystrokes for passwords, etc.
+    "privacy_blacklist": [
+        "password", "login", "signin", "credit", "card", "bank", "account",
+        "social security", "ssn", "secret", "private"
+    ],
+    "app_blacklist": [
+        "keychain", "password", "vault", "bank", "wallet"
+    ],
+    
+    # OCR settings
+    "enable_ocr": True,
+    "ocr_language": "eng",  # Language for Tesseract OCR
     
     # Automation settings
-    "suggestion_threshold": 0.6,  # Minimum confidence for suggestions
-    "pattern_min_occurrences": 3,  # Minimum occurrences to detect a pattern
+    "suggest_automations": True,
+    "min_pattern_occurrences": 3,  # Minimum occurrences to suggest automation
+    "suggestion_confidence_threshold": 0.6,  # Minimum confidence to show suggestions
+    
+    # Machine learning settings
+    "ml_enabled": True,
+    "training_interval_days": 7,  # Days between model retraining
+    
+    # UI settings
+    "sidebar_opacity": 0.9,
+    "auto_hide_sidebar": True,
+    "sidebar_position": "right",  # left, right
+    "theme": "system",  # light, dark, system
+    
+    # Internal settings (not exposed in UI)
+    "_last_training": None,  # Timestamp of last ML model training
+    "_db_version": 1,  # Database schema version
 }
-
-# Path to the configuration file
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'config.json')
 
 def load_config():
     """
@@ -51,30 +73,30 @@ def load_config():
     Returns:
         dict: Configuration dictionary
     """
-    if os.path.exists(CONFIG_PATH):
-        try:
-            with open(CONFIG_PATH, 'r') as f:
-                config = json.load(f)
-            
-            # Update with any missing default values
-            for key, value in DEFAULT_CONFIG.items():
-                if key not in config:
-                    config[key] = value
-            
-            return config
-        except (json.JSONDecodeError, IOError) as e:
-            logging.error(f"Error loading configuration file: {e}")
-            return DEFAULT_CONFIG.copy()
+    global CONFIG
+    
+    # Get data directory
+    data_dir = CONFIG["data_dir"]
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir, exist_ok=True)
+    
+    # Config file path
+    config_file = os.path.join(data_dir, "config.json")
+    
+    # Try to load from file
+    loaded_config = load_json_file(config_file)
+    
+    if loaded_config:
+        # Merge with defaults (to ensure new settings are included)
+        for key, value in loaded_config.items():
+            CONFIG[key] = value
+        logger.info("Configuration loaded from file")
     else:
-        # Create default configuration file
-        os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-        try:
-            with open(CONFIG_PATH, 'w') as f:
-                json.dump(DEFAULT_CONFIG, f, indent=2)
-        except IOError as e:
-            logging.error(f"Error creating configuration file: {e}")
-        
-        return DEFAULT_CONFIG.copy()
+        # Save defaults to file
+        save_config(CONFIG)
+        logger.info("Default configuration created")
+    
+    return CONFIG
 
 def save_config(config):
     """
@@ -86,14 +108,28 @@ def save_config(config):
     Returns:
         bool: Success status
     """
-    try:
-        os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-        with open(CONFIG_PATH, 'w') as f:
-            json.dump(config, f, indent=2)
-        return True
-    except (TypeError, IOError) as e:
-        logging.error(f"Error saving configuration file: {e}")
-        return False
+    global CONFIG
+    
+    # Update global config
+    CONFIG.update(config)
+    
+    # Get data directory
+    data_dir = CONFIG["data_dir"]
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir, exist_ok=True)
+    
+    # Config file path
+    config_file = os.path.join(data_dir, "config.json")
+    
+    # Save to file
+    success = save_json_file(config_file, CONFIG)
+    
+    if success:
+        logger.info("Configuration saved to file")
+    else:
+        logger.error("Failed to save configuration")
+    
+    return success
 
 def update_config(key, value):
     """
@@ -106,9 +142,13 @@ def update_config(key, value):
     Returns:
         bool: Success status
     """
-    config = load_config()
-    config[key] = value
-    return save_config(config)
+    global CONFIG
+    
+    # Update the value
+    CONFIG[key] = value
+    
+    # Save the updated configuration
+    return save_config(CONFIG)
 
-# Load configuration on module import
+# Load configuration when module is imported
 CONFIG = load_config()

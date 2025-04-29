@@ -123,8 +123,20 @@ def init_db():
     """Initialize the database connection and create tables if they don't exist"""
     # Get database URL from environment variable
     database_url = os.environ.get('DATABASE_URL')
+    
     if not database_url:
-        raise ValueError("DATABASE_URL environment variable is not set")
+        # Fallback to SQLite for local development
+        print("WARNING: DATABASE_URL environment variable is not set.")
+        print("Using SQLite database for local development.")
+        print("For production, please set the DATABASE_URL environment variable.")
+        
+        # Create data directory if it doesn't exist
+        data_dir = os.path.join(os.path.expanduser("~"), ".smart_desktop_tracker")
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir, exist_ok=True)
+        
+        # Use SQLite database in the data directory
+        database_url = f"sqlite:///{os.path.join(data_dir, 'smart_desktop_tracker.db')}"
     
     # Create database engine
     engine = create_engine(database_url)

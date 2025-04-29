@@ -34,7 +34,26 @@ class DBManager:
             logger.info("Database manager initialized")
         except Exception as e:
             logger.error(f"Database initialization error: {e}")
-            raise
+            # Print a more user-friendly message
+            print("\n====== DATABASE CONFIGURATION ERROR ======")
+            print("There was an error connecting to the database.")
+            print("If you're running this application for the first time, this is normal.")
+            print("\nTo fix this issue:")
+            print("1. Make sure PostgreSQL is installed and running.")
+            print("2. Create a database for the application.")
+            print("3. Set the DATABASE_URL environment variable with your connection string.")
+            print("   Example: postgresql://username:password@localhost:5432/dbname")
+            print("\nAlternatively, the application will use a local SQLite database for testing.")
+            print("============================================\n")
+            # Don't raise the exception; continue with a default SQLite database
+            try:
+                self.engine = init_db()  # This will use the SQLite fallback
+                self.Session = sessionmaker(bind=self.engine)
+                self._ensure_default_user()
+                logger.info("Using SQLite database instead")
+            except Exception as inner_e:
+                logger.error(f"Failed to initialize SQLite database: {inner_e}")
+                raise
     
     def _ensure_default_user(self):
         """Ensure that a default user exists in the database"""
