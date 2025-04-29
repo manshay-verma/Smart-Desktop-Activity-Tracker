@@ -1,87 +1,75 @@
-+--------------------------------------------------+
-|               Smart Desktop Tracker               |
-+--------------------------------------------------+
-                          |
-                          |
- +----------------------+-------------------------+
- |                      |                         |
- v                      v                         v
-+-------------+   +-------------+   +------------------------+
-|    Input    |   |  Processing |   |        Output         |
-|   Modules   |   |   Modules   |   |        Modules        |
-+-------------+   +-------------+   +------------------------+
-|             |   |             |   |                        |
-| KeyLogger <-----> TextAnalyzer<---> GUIInterface          |
-|             |   |             |   |                        |
-| MouseLogger <-----> MLEngine  <---> AutomationModule      |
-|             |   |             |   |                        |
-| ScreenLogger<-----> TaskSuggestor-> Database              |
-|             |   |             |   |                        |
-+-------------+   +-------------+   +------------------------+
-                          |
-                          v
-                  +---------------+
-                  |  Central DB   |
-                  +---------------+
-                  | - Users       |
-                  | - Screenshots |
-                  | - Activities  |
-                  | - Automations |
-                  | - Suggestions |
-                  +---------------+
+Smart Desktop Activity Tracker - System Architecture
+=========================================
 
-+--------------------------------------------------+
-|              Component Architecture              |
-+--------------------------------------------------+
-+------------------+        +-----------------------+
-| main.py          |<-------| config.py            |
-| (Controller)     |        | (Configuration)      |
-+------------------+        +-----------------------+
-        |
-        v
-+------------------+
-| shared_data      |
-| (Central State)  |
-+------------------+
-        |
-        +-----------------+----------------+---------------+
-        |                 |                |               |
-        v                 v                v               v
-+------------------+ +-----------+ +---------------+ +------------+
-| gui_interface.py | | *_logger  | | text_analyzer | | db_manager |
-| (UI)             | | (Input)   | | (Processing)  | | (Storage)  |
-+------------------+ +-----------+ +---------------+ +------------+
-        ^                 |                |               ^
-        |                 v                v               |
-        |          +--------------------------+            |
-        +----------| automation & ml modules  |------------+
-                   | (Intelligence Layer)     |
-                   +--------------------------+
+                                     ┌────────────────────┐
+                                     │                    │
+                                     │    Main App        │
+                                     │                    │
+                                     └──────────┬─────────┘
+                                                │
+                                                │
+               ┌───────────────────────────────┼───────────────────────────┐
+               │                               │                           │
+               │                               │                           │
+    ┌──────────▼─────────┐         ┌──────────▼─────────┐        ┌────────▼─────────┐
+    │                    │         │                    │        │                   │
+    │  Input Tracking    │         │  Data Processing   │        │  User Interface   │
+    │                    │         │                    │        │                   │
+    └──────────┬─────────┘         └──────────┬─────────┘        └─────────┬────────┘
+               │                               │                           │
+┌──────────────┴───────────┐     ┌────────────┴───────────┐      ┌────────┴────────┐
+│                          │     │                        │      │                 │
+│ ┌────────────────────┐  │     │ ┌──────────────────┐   │      │ ┌─────────────┐ │
+│ │                    │  │     │ │                  │   │      │ │             │ │
+│ │  Keyboard Logger   │  │     │ │  Text Analyzer   │   │      │ │ Floating    │ │
+│ │                    │  │     │ │                  │   │      │ │ Sidebar     │ │
+│ └────────────────────┘  │     │ └──────────────────┘   │      │ │             │ │
+│                          │     │                        │      │ └─────────────┘ │
+│ ┌────────────────────┐  │     │ ┌──────────────────┐   │      │                 │
+│ │                    │  │     │ │                  │   │      │ ┌─────────────┐ │
+│ │  Mouse/Screen      │  │     │ │  ML Integration  │   │      │ │             │ │
+│ │  Logger            │  │     │ │                  │   │      │ │ Settings UI │ │
+│ └────────────────────┘  │     │ └──────────────────┘   │      │ │             │ │
+│                          │     │                        │      │ └─────────────┘ │
+└──────────────────────────┘     │ ┌──────────────────┐   │      │                 │
+                                  │ │                  │   │      │ ┌─────────────┐ │
+                                  │ │  Automation      │   │      │ │             │ │
+                                  │ │  Module          │   │      │ │ Activity    │ │
+                                  │ │                  │   │      │ │ History     │ │
+                                  │ └──────────────────┘   │      │ │             │ │
+                                  │                        │      │ └─────────────┘ │
+                                  └────────────┬───────────┘      └─────────────────┘
+                                               │
+                                    ┌──────────▼─────────┐
+                                    │                    │
+                                    │  Database Manager  │
+                                    │                    │
+                                    └──────────┬─────────┘
+                                               │
+                                               │
+                                    ┌──────────▼─────────┐
+                                    │                    │
+                                    │  Database          │
+                                    │  (PostgreSQL/SQLite)│
+                                    │                    │
+                                    └────────────────────┘
 
-+--------------------------------------------------+
-|                   Data Flow                      |
-+--------------------------------------------------+
- User Interaction
-        |
-        v
- +----------------+     +-------------------+
- |  Input Capture |---->| OCR Text Analysis |
- +----------------+     +-------------------+
-        |                        |
-        v                        v
- +----------------+     +-------------------+
- | Activity Log   |<----| Pattern Detection |
- +----------------+     +-------------------+
-        |                        |
-        v                        v
- +----------------+     +-------------------+
- | Database Store |<----| ML Processing     |
- +----------------+     +-------------------+
-        |                        |
-        v                        v
- +----------------+     +-------------------+
- | UI Display     |<----| Automation Engine |
- +----------------+     +-------------------+
-        |                        |
-        v                        v
- User Feedback      Automated Actions
+Data Flow:
+---------
+1. Input Tracking modules capture keyboard, mouse, and screen activity
+2. Data is processed by Text Analyzer and ML Integration modules
+3. Automation Module identifies and suggests repetitive tasks
+4. Database Manager stores data in PostgreSQL (primary) or SQLite (fallback)
+5. User Interface components display real-time information and collect feedback
+6. Main App coordinates all modules and handles application lifecycle
+
+Module Responsibilities:
+----------------------
+- Main App: Initializes and coordinates all modules
+- Keyboard Logger: Captures keyboard activity
+- Mouse/Screen Logger: Captures mouse movements, clicks, and screenshots
+- Text Analyzer: Extracts and analyzes text from screenshots
+- ML Integration: Machine learning for pattern recognition and predictions
+- Automation Module: Records and executes automation sequences
+- Database Manager: Handles database operations and maintenance
+- User Interface: Displays information and collects user feedback

@@ -1,82 +1,84 @@
 # Smart Desktop Activity Tracker
 
-A comprehensive desktop activity monitoring and automation tool that tracks user activities, analyzes behavior patterns, and suggests automations for repetitive tasks.
+A powerful Windows desktop application for tracking user activity, analyzing work patterns, and suggesting automation opportunities.
 
 ## Features
 
-- **Activity Tracking**: Captures screenshots, keyboard/mouse interactions, and window title information
-- **Text Analysis**: Extracts text from screenshots using OCR for rich context analysis
-- **Pattern Recognition**: Uses ML algorithms to identify repetitive tasks and behavior patterns
-- **Automation Suggestions**: Suggests automations for frequently performed tasks
-- **Automation Execution**: Records and executes automation macros for repetitive tasks
-- **Privacy Controls**: Configurable privacy settings with content filtering for sensitive information
-- **Data Storage**: Secure PostgreSQL database for activity storage and analysis
-- **Interactive GUI**: Floating sidebar for real-time activity monitoring and automation control
+- **Activity Monitoring**: Track keyboard and mouse activity to understand work patterns
+- **Screenshot Capture**: Automatically capture and analyze screenshots based on activity triggers
+- **Text Analysis**: Extract and analyze text from screenshots to identify application usage
+- **Automation Suggestion**: Identify repetitive tasks and suggest automation opportunities
+- **User-Friendly Interface**: Real-time activity display and customization options
 
 ## System Requirements
 
-- Windows 10/11 (64-bit)
-- Python 3.8 or higher
-- PostgreSQL 12 or higher
-- 4GB RAM minimum
-- 500MB free disk space
+- Windows 10/11
+- Python 3.8 or newer
+- 4GB RAM minimum (8GB recommended)
+- 100MB free disk space plus storage for screenshots
 
 ## Installation
 
-1. Ensure Python 3.8+ is installed on your system
-2. Install PostgreSQL and create a database for the application
-3. Clone the repository
-4. Install required packages: `pip install -r dependencies.txt`
-5. Set the DATABASE_URL environment variable to your PostgreSQL connection string
-6. Run the application: `python main.py`
+See [Installation Guide](installation_guide.md) for detailed setup instructions.
+
+Quick start:
+1. Run `setup.bat` as administrator
+2. After setup completes, run `start.bat`
+
+## Usage
+
+### Main Interface
+
+The application runs with a floating sidebar that can be:
+- Expanded or collapsed
+- Moved around the screen
+- Set to auto-hide when not in use
+
+### Activity Tracking
+
+- Activity is tracked automatically in the background
+- Screenshots are taken based on configured triggers
+- Text is extracted and analyzed from screenshots
+- Repetitive patterns are identified for automation
+
+### Automation
+
+- Identify repetitive tasks through pattern recognition
+- Record and execute automation sequences
+- Customize automation triggers
+- Manage suggested automations
 
 ## Configuration
 
-The application can be configured by editing the `config.json` file that is created in the application's data directory on first run. Key configuration options include:
+- **Settings**: Customize appearance, tracking intervals, and notifications
+- **Privacy**: Control what data is captured and stored
+- **Storage**: Manage screenshot retention and database cleanup
+- **Automation**: Configure trigger sensitivities and execution preferences
 
-- **Screenshot settings**: Frequency, quality, and storage limits
-- **Privacy settings**: Blacklisted applications and keywords
-- **Automation settings**: Pattern detection sensitivity and suggestion thresholds
-- **UI settings**: Sidebar position, opacity, and auto-hide behavior
+## Troubleshooting
 
-## Database Schema
+See the [Installation Guide](installation_guide.md) for common troubleshooting steps.
 
-The application uses the following database tables:
-
-- **users**: User profiles and settings
-- **screenshots**: Screenshot metadata and file paths
-- **activity_logs**: User activity history
-- **automation_tasks**: Recorded automation macros
-- **automation_suggestions**: Suggested automations based on detected patterns
-
-## Module Structure
-
-- **main.py**: Main entry point and module coordinator
-- **gui_interface.py**: Qt-based graphical user interface
-- **screen_mouse_logger.py**: Screen capture and mouse activity tracking
-- **keyboard_logger.py**: Keyboard activity monitoring
-- **text_analyzer.py**: OCR and text analysis from screenshots
-- **automation_module.py**: Automation recording and execution
-- **repetitive_task_suggestion.py**: Pattern detection and suggestion generation
-- **ml_integration.py**: Machine learning for pattern recognition
-- **db_manager.py**: Database operations
-- **models.py**: Database models
-- **utils.py**: Utility functions
-- **config.py**: Configuration management
-
-## Dependencies
-
-See the `dependencies.txt` file for a complete list of required Python packages.
+For database issues, run:
+```
+fix_db.bat
+```
 
 ## Privacy Considerations
 
-The application includes several privacy features:
-
-- Keyboard privacy mode to prevent logging of sensitive information
-- Application blacklist to avoid monitoring sensitive applications
-- Configurable data retention policies
-- Local-only processing with no data sent to external servers
+- All data is stored locally on your machine
+- No data is transmitted to external servers
+- Option to exclude sensitive applications from tracking
+- Automatic cleanup of old data based on configured retention period
 
 ## License
 
-MIT License
+[MIT License](LICENSE)
+
+## Acknowledgements
+
+- [SQLAlchemy](https://www.sqlalchemy.org/) - Database ORM
+- [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) - GUI Framework
+- [OpenCV](https://opencv.org/) - Image Processing
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) - Text Extraction
+- [scikit-learn](https://scikit-learn.org/) - Machine Learning

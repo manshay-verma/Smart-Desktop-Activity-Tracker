@@ -1,29 +1,11 @@
-# Core dependencies
-SQLAlchemy==2.0.7
+sqlalchemy==1.4.46
 psycopg2-binary==2.9.5
-alembic==1.10.2
-PyQt5==5.15.9
-PyQtWebEngine==5.15.6
 pynput==1.7.6
-mss==7.0.1
 Pillow==9.4.0
-opencv-python==4.7.0.72
+PyQt5==5.15.9
+keyboard==0.13.5
+python-dotenv==1.0.0
 pytesseract==0.3.10
 numpy==1.24.2
-pandas==2.0.0
+opencv-python==4.7.0.72
 scikit-learn==1.2.2
-networkx==3.0
-joblib==1.2.0
-matplotlib==3.7.1
-python-dotenv==1.0.0
-requests==2.31.0
-beautifulsoup4==4.12.2
-lxml==4.9.2
-
-# Optional dependencies
-pyautogui==0.9.53
-pyperclip==1.8.2
-psutil==5.9.4
-humanize==4.6.0
-python-magic==0.4.27
-tqdm==4.65.0
