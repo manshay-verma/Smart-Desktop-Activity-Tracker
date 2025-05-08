@@ -1,0 +1,217 @@
+PS C:\Users\Manshay\Desktop\Software-developer> cmd /c "c:\Users\Manshay\Desktop\Software-developer\start.bat"
+
+Smart Desktop Activity Tracker
+============================
+
+Starting application...
+2025-04-30 02:47:00,660 - smart_desktop_tracker - INFO - Configuration loaded from file
+WARNING: DATABASE_URL environment variable is not set.
+Using SQLite database for local development.
+For production, please set the DATABASE_URL environment variable.
+2025-04-30 02:47:04,646 - smart_desktop_tracker - ERROR - Database initialization error: (in table 'users', column 'settings'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x0000020845D0C0D0> can't render element of type JSONB
+
+====== DATABASE CONFIGURATION ERROR ======
+There was an error connecting to the database.
+If you're running this application for the first time, this is normal.
+
+To fix this issue:
+1. Make sure PostgreSQL is installed and running.
+2. Create a database for the application.
+3. Set the DATABASE_URL environment variable with your connection string.
+   Example: postgresql://username:password@localhost:5432/dbname
+
+Alternatively, the application will use a local SQLite database for testing.
+============================================
+
+WARNING: DATABASE_URL environment variable is not set.
+Using SQLite database for local development.
+For production, please set the DATABASE_URL environment variable.
+2025-04-30 02:47:04,656 - smart_desktop_tracker - ERROR - Failed to initialize SQLite database: (in table 'users', column 'settings'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x0000020845D17B90> can't render element of type JSONB
+Traceback (most recent call last):
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 139, in _compiler_dispatch
+    meth = getter(visitor)
+           ^^^^^^^^^^^^^^^
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'. Did you mean: 'visit_JSON'?       
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 5969, in visit_create_table
+    processed = self.process(
+                ^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 755, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 143, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 6000, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\dialects\sqlite\base.py", line 1546, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 800, in process
+    return type_._compiler_dispatch(self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 141, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 805, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x0000020845D0C0D0> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Manshay\Desktop\Software-developer\db_manager.py", line 28, in __init__
+    self.engine = init_db()
+                  ^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\models.py", line 145, in init_db
+    Base.metadata.create_all(engine)
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\schema.py", line 5581, in create_all
+    bind._run_ddl_visitor(
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3226, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2430, in _run_ddl_visitor
+    visitorcallable(self.dialect, self, **kwargs).traverse_single(element)
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 670, in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 924, in visit_metadata
+    self.traverse_single(
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 670, in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 963, in visit_table
+    )._invoke_with(self.connection)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 315, in _invoke_with
+    return bind.execute(self)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1414, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 181, in _execute_on_connection
+    return connection._execute_ddl(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+               ^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 283, in compile
+    return self._compiler(dialect, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 69, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 710, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 755, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 143, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 5979, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'users', column 'settings'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x0000020845D0C0D0> can't render element of type JSONB
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 139, in _compiler_dispatch
+    meth = getter(visitor)
+           ^^^^^^^^^^^^^^^
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'. Did you mean: 'visit_JSON'?       
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 5969, in visit_create_table
+    processed = self.process(
+                ^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 755, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 143, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 6000, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\dialects\sqlite\base.py", line 1546, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 800, in process
+    return type_._compiler_dispatch(self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 141, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 805, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x0000020845D17B90> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Manshay\Desktop\Software-developer\main.py", line 25, in <module>
+    from db_manager import db_manager
+  File "C:\Users\Manshay\Desktop\Software-developer\db_manager.py", line 548, in <module>
+    db_manager = DBManager()
+                 ^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\db_manager.py", line 50, in __init__
+    self.engine = init_db()  # This will use the SQLite fallback
+                  ^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\models.py", line 145, in init_db
+    Base.metadata.create_all(engine)
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\schema.py", line 5581, in create_all
+    bind._run_ddl_visitor(
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3226, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2430, in _run_ddl_visitor
+    visitorcallable(self.dialect, self, **kwargs).traverse_single(element)
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 670, in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 924, in visit_metadata
+    self.traverse_single(
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 670, in traverse_single
+    return meth(obj, **kw)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 963, in visit_table
+    )._invoke_with(self.connection)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 315, in _invoke_with
+    return bind.execute(self)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1414, in execute
+    return meth(
+           ^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 181, in _execute_on_connection
+    return connection._execute_ddl(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+               ^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 283, in compile
+    return self._compiler(dialect, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\ddl.py", line 69, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 710, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 755, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\visitors.py", line 143, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\Manshay\Desktop\Software-developer\venv\Lib\site-packages\sqlalchemy\sql\compiler.py", line 5979, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'users', column 'settings'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x0000020845D17B90> can't render element of type JSONB
+Application exited with an error.
+Press any key to continue . . . 

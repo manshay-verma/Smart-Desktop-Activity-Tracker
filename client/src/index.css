@@ -1,0 +1,239 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  
+  --primary: 206 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  
+  --ring: 215 20.2% 65.1%;
+  
+  --radius: 0.5rem;
+
+  --chart-1: 215 70% 60%;
+  --chart-2: 25 70% 60%;
+  --chart-3: 145 70% 60%;
+  --chart-4: 270 70% 60%;
+  --chart-5: 335 70% 60%;
+
+  --sidebar-background: 210 40% 96.1%;
+  --sidebar-foreground: 222.2 47.4% 11.2%;
+  --sidebar-primary: 206 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 215 20.2% 65.1%;
+  --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+  --sidebar-border: 214.3 31.8% 91.4%;
+  --sidebar-ring: 215 20.2% 65.1%;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  
+  --primary: 206 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 100%;
+  
+  --ring: 217.2 32.6% 17.5%;
+
+  --chart-1: 215 70% 60%;
+  --chart-2: 25 70% 60%;
+  --chart-3: 145 70% 60%;
+  --chart-4: 270 70% 60%;
+  --chart-5: 335 70% 60%;
+
+  --sidebar-background: 217.2 32.6% 17.5%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-primary: 206 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 215 20.2% 65.1%;
+  --sidebar-accent-foreground: 210 40% 98%;
+  --sidebar-border: 214.3 31.8% 20%;
+  --sidebar-ring: 217.2 32.6% 17.5%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Floating Sidebar Styles */
+.floating-sidebar {
+  position: fixed;
+  height: 80vh;
+  width: 300px;
+  z-index: 1000;
+  transition: transform 0.3s ease-in-out;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.floating-sidebar.right {
+  right: 20px;
+  top: 10vh;
+}
+
+.floating-sidebar.left {
+  left: 20px;
+  top: 10vh;
+}
+
+.floating-sidebar.collapsed {
+  transform: translateX(calc(100% - 40px));
+}
+
+.floating-sidebar.left.collapsed {
+  transform: translateX(calc(-100% + 40px));
+}
+
+.sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px 0 0 6px;
+  transform: translateY(-50%);
+}
+
+.floating-sidebar.right .sidebar-toggle {
+  left: -24px;
+}
+
+.floating-sidebar.left .sidebar-toggle {
+  right: -24px;
+  border-radius: 0 6px 6px 0;
+}
+
+/* Activity log item animation */
+.activity-item {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Screenshot viewer styles */
+.screenshot-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screenshot-container {
+  max-width: 90vw;
+  max-height: 90vh;
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.screenshot-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.mouse-indicator {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: rgba(255, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Automation panel styles */
+.automation-step {
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  background-color: rgba(var(--secondary), 0.5);
+  position: relative;
+}
+
+.automation-step-number {
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 12px;
+}

@@ -1,0 +1,113 @@
+Text Analyzer module is one of the most powerful parts of the system — and yes, it will be challenging, but very doable with a smart plan. Here's how I suggest you build it, step by step, with ideas to solve your problems:
+
+🧠 Goal Recap:
+You want the Text Analyzer module to:
+
+Analyze text from screenshots.
+
+Divide the screenshot into sections (like open windows or apps).
+
+Highlight/label which section the mouse is in.
+
+Show that area’s text or activity in a live sliding sidebar (floating UI).
+
+✅ Suggested Architecture & Workflow:
+📍 Step 1: Image Preprocessing
+Convert the screenshot to grayscale (for faster OCR).
+
+Use window detection:
+
+Use edge detection (e.g., Canny filter).
+
+Try to identify window borders, title bars, etc.
+
+OR, use pre-trained object detection for known apps.
+
+🔧 Optional: Add fixed logic for common layouts (left taskbar, top browser tabs, etc.).
+
+📍 Step 2: Divide Screenshot into Sections
+Once you detect window bounds, slice the screenshot into those window segments.
+
+Assign a section ID like window_1, window_2, etc.
+
+Save each cropped region separately.
+
+Example: If Chrome and VS Code are open, crop both windows individually.
+
+📍 Step 3: Mouse Position Mapping
+At time of screenshot, you already have the (x, y) of mouse.
+
+Check which window section contains that coordinate.
+
+Mark it as the “active” area.
+
+Save this in logs like:
+
+json
+Copy
+Edit
+{
+  "screenshot": "path_to_image",
+  "mouse_section": "window_2",
+  "text_in_area": "You were browsing github.com",
+  ...
+}
+📍 Step 4: OCR with Area Tagging
+Use Tesseract OCR or easyocr to extract text from each cropped region.
+
+Save results per window (or app) in a structured format like:
+
+json
+Copy
+Edit
+{
+  "window_1": "Visual Studio Code - file.py",
+  "window_2": "Google Chrome - StackOverflow",
+  ...
+}
+📍 Step 5: Sidebar Floating UI (in Qt)
+Create a floating Qt widget (always-on-top, semi-transparent).
+
+Show:
+
+Active App Name (based on mouse)
+
+Text/Info from that window
+
+Timestamp
+
+Animate or auto-hide when idle
+
+📍 Step 6: Challenges You’ll Face — and Ideas
+
+Challenge	Suggestion
+Hard to detect window boundaries	Start simple: Use fixed rules, then move to object detection or ML window classifiers
+OCR might be slow	Crop only near the mouse first, or run OCR in a separate thread
+Sidebar overlays important screen areas	Let user move it, or auto-position it based on active app
+Too much data	Store logs in daily folders, summarize hourly
+Window overlap	Detect Z-order if possible (Windows API), or just assume “topmost” based on click
+🛠 Extras You Can Add Later
+Detect app logos via image recognition (for branding)
+
+Tag content (e.g., “Code window”, “Browser”, “Terminal”)
+
+Add “confidence score” from OCR for each text block
+
+Show frequent patterns (same tab, same app, repeated clicks)
+
+Want suggestions for:
+
+How to do live window detection?
+
+How to crop around the mouse only and auto-label that area?
+
+How to design the sidebar layout?
+
+Let me know what to focus on next 🔍
+
+
+
+
+
+
+
